@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hasibur’s Career OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#f2f4ef;--card:#fff;--ink:#14232b;--mute:#5d6d75;--line:#d9dfd8;--acc:#1f6f8b;--acc-ink:#fff;--warn:#c27a14;--ok:#2f8a57;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a20;--card:#17262e;--ink:#e8eef0;--mute:#9bb0b8;--line:#28404b;--acc:#5fb4d1;--acc-ink:#0f1a20;--warn:#e8a84a;--ok:#5fc488;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1a20;--card:#17262e;--ink:#e8eef0;--mute:#9bb0b8;--line:#28404b;--acc:#5fb4d1;--acc-ink:#0f1a20;--warn:#e8a84a;--ok:#5fc488;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "IBM Plex Sans",system-ui,sans-serif;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+main{max-width:640px;margin:0 auto;padding:18px 16px}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0;line-height:1.15}
+h1{font-size:26px}h2{font-size:20px;margin:22px 0 10px}h3{font-size:16px}
+.sub{color:var(--mute);margin:4px 0 0;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0}
+.hero{padding:18px}
+.big{font-family:"Bricolage Grotesque",sans-serif;font-size:64px;font-weight:700;line-height:1;color:var(--warn)}
+.ruler{height:10px;background:var(--line);border-radius:5px;overflow:hidden;margin:12px 0 4px}
+.ruler i{display:block;height:100%;background:var(--warn)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat b{display:block;font:700 24px "Bricolage Grotesque",sans-serif}
+.stat span{color:var(--mute);font-size:13px

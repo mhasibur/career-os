@@ -1,0 +1,30 @@
+name: Daily brief
+on:
+  schedule:
+    - cron: "30 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run daily brief
+        run: python daily_brief.py
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          VISA_END: "2028-11-04"
+      - name: Save jobs.json
+        run: |
+          git config user.name "career-bot"
+          git config user.email "career-bot@users.noreply.github.com"
+          git add jobs.json
+          git diff --cached --quiet || (git commit -m "Update jobs" && git push)
