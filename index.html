@@ -106,6 +106,37 @@ function home(){
   hero=`<div class="card hero"><h3>Set your visa end date</h3><p class="sub">Every plan here counts back from this date.</p>
   <input type="date" id="pswIn"> <button onclick="setPsw($('pswIn').value)">Save date</button></div>`;
  }
+
+ const aiBrief = `
+ <div class="card">
+   <h2>🤖 Daily AI Brief</h2>
+   <p class="sub">Your automated career and application updates tracker.</p>
+   <div class="ruler"><i style="width: 75%;"></i></div>
+ </div>`;
+
+ const r=pct(),jobs=S.jobs,td=todayStr(),T=S.today[td]||{};
+ const daily=[['learn','Learn for 1.5 hours'],['build','Work on a project for 30 minutes'],['apply','Apply or network for 30 minutes']];
+ const next=[];PHASES.forEach((p,i)=>p.t.forEach((t,j)=>{if(!S.done['p'+i+'t'+j]&&next.length<3)next.push(t)}));
+ return `<h1>Hasibur’s Career OS</h1><p class="sub">MSc AI and Data Science → a sponsored data or ML role in the UK</p>${hero}${aiBrief}${account()}
+ <div class="grid"><div class="card stat"><b>${r.p}%</b><span>Roadmap done</span></div>
+ <div class="card stat"><b>${weekHours()}h</b><span>Learning this week (goal 10h)</span></div>
+ <div class="card stat"><b>${jobs.filter(j=>j.s!=='Saved').length}</b><span>Applications sent</span></div>
+ <div class="card stat"><b>${jobs.filter(j=>j.s==='Interview'||j.s==='Offer').length}</b><span>Interviews and offers</span></div></div>
+ <h2>Today</h2><div class="card">${daily.map(([k,l])=>`<label class="chk ${T[k]?'done':''}"><input type="checkbox" ${T[k]?'checked':''} onchange="tick('${k}',this.checked)"><span>${l}</span></label>`).join('')}</div>
+ <h2>Next up on the roadmap</h2><div class="card">${next.length?next.map(t=>`<div class="chk" style="display:block;padding:6px 0">${esc(t)}</div>`).join(''):'<div class="empty">Every roadmap task is done.</div>'}</div>`;
+}
+function home(){
+ let hero='';
+ if(S.psw){
+  const left=Math.ceil((new Date(S.psw)-Date.now())/864e5);
+  const used=Math.min(100,Math.max(0,Math.round((730-left)/730*100)));
+  hero=`<div class="card hero"><div class="sub">Days left on your Graduate visa</div><div class="big">${left>0?left:0}</div>
+  <div class="ruler"><i style="width:${used}%"></i></div><div class="sub">${used}% of the 2-year window used. Target: a sponsored job before it ends.</div>
+  <div class="row" style="margin-top:10px"><label class="sub">Visa end date <input type="date" value="${esc(S.psw)}" onchange="setPsw(this.value)"></label></div></div>`;
+ }else{
+  hero=`<div class="card hero"><h3>Set your visa end date</h3><p class="sub">Every plan here counts back from this date.</p>
+  <input type="date" id="pswIn"> <button onclick="setPsw($('pswIn').value)">Save date</button></div>`;
+ }
  const r=pct(),jobs=S.jobs,td=todayStr(),T=S.today[td]||{};
  const daily=[['learn','Learn for 1.5 hours'],['build','Work on a project for 30 minutes'],['apply','Apply or network for 30 minutes']];
  const next=[];PHASES.forEach((p,i)=>p.t.forEach((t,j)=>{if(!S.done['p'+i+'t'+j]&&next.length<3)next.push(t)}));
