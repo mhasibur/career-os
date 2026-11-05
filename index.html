@@ -125,7 +125,6 @@ function home(){
  <h2>Today</h2><div class="card">${daily.map(([k,l])=>`<label class="chk ${T[k]?'done':''}"><input type="checkbox" ${T[k]?'checked':''} onchange="tick('${k}',this.checked)"><span>${l}</span></label>`).join('')}</div>
  <h2>Next up on the roadmap</h2><div class="card">${next.length?next.map(t=>`<div class="chk" style="display:block;padding:6px 0">${esc(t)}</div>`).join(''):'<div class="empty">Every roadmap task is done.</div>'}</div>`;
 }
-function home(){
  let hero='';
  if(S.psw){
   const left=Math.ceil((new Date(S.psw)-Date.now())/864e5);
