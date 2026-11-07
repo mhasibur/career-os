@@ -47,12 +47,54 @@ def load_sponsors():
         return None
 
 
+def _demo_jobs():
+    """Sample job entries used when running in DEMO_MODE without real credentials."""
+    return [
+        {
+            "title": "Data Scientist",
+            "company": "Nexus AI Labs",
+            "location": "London, UK",
+            "url": "https://www.adzuna.co.uk/jobs/details/demo1",
+            "salary_min": 65000,
+            "salary_max": 85000,
+            "created": TODAY.isoformat(),
+        },
+        {
+            "title": "Machine Learning Engineer",
+            "company": "Quantica Analytics",
+            "location": "Manchester, Greater Manchester",
+            "url": "https://www.adzuna.co.uk/jobs/details/demo2",
+            "salary_min": 70000,
+            "salary_max": 90000,
+            "created": TODAY.isoformat(),
+        },
+        {
+            "title": "Graduate Data Analyst",
+            "company": "Bloom Health Tech",
+            "location": "Edinburgh, Scotland",
+            "url": "https://www.adzuna.co.uk/jobs/details/demo3",
+            "salary_min": 30000,
+            "salary_max": 38000,
+            "created": TODAY.isoformat(),
+        },
+    ]
+
+
 def fetch_jobs():
+    app_id = os.environ.get("ADZUNA_APP_ID")
+    app_key = os.environ.get("ADZUNA_APP_KEY")
+    demo = os.environ.get("DEMO_MODE", "").lower() in {"1", "true", "yes"}
+    if not app_id or not app_key:
+        if demo:
+            print("Adzuna credentials missing; running in demo mode with sample data.")
+            return _demo_jobs()
+        print("Adzuna API credentials missing (ADZUNA_APP_ID / ADZUNA_APP_KEY). Skipping fetch.")
+        return []
     found = {}
     for query in ROLES:
         params = urllib.parse.urlencode({
-            "app_id": os.environ["ADZUNA_APP_ID"],
-            "app_key": os.environ["ADZUNA_APP_KEY"],
+            "app_id": app_id,
+            "app_key": app_key,
             "results_per_page": 30,
             "what": query,
             "max_days_old": 7,
@@ -114,13 +156,18 @@ def make_brief(jobs, days_left):
 
 
 def send_telegram(text):
+    bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    if not bot_token or not chat_id:
+        print("Telegram credentials missing (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID). Skipping Telegram notification.")
+        return
     body = urllib.parse.urlencode({
-        "chat_id": os.environ["TELEGRAM_CHAT_ID"],
+        "chat_id": chat_id,
         "text": text[:4000],
         "disable_web_page_preview": "true",
     }).encode()
     try:
-        http(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage", data=body)
+        http(f"https://api.telegram.org/bot{bot_token}/sendMessage", data=body)
         print("Telegram sent")
     except Exception as e:
         print("Telegram failed:", type(e).__name__)
@@ -130,21 +177,30 @@ def main():
     days_left = (VISA_END - TODAY).days
     sponsors = load_sponsors()
     jobs = fetch_jobs()
-    for j in jobs:
-        j["sponsor"] = (norm(j["company"]) in sponsors) if sponsors else None
-    jobs.sort(key=lambda j: (j["sponsor"] is not True, -int((j["created"] or "0").replace("-", "") or 0)))
-    jobs = jobs[:40]
 
-    with open("jobs.json", "w", encoding="utf-8") as f:
-        json.dump({
-            "updated": datetime.datetime.utcnow().isoformat() + "Z",
-            "sponsor_list_loaded": sponsors is not None,
-            "jobs": jobs,
-        }, f, ensure_ascii=False, indent=1)
+    if jobs:
+        for j in jobs:
+            j["sponsor"] = (norm(j["company"]) in sponsors) if sponsors else None
+        jobs.sort(key=lambda j: (j["sponsor"] is not True, -int((j["created"] or "0").replace("-", "") or 0)))
+        jobs = jobs[:40]
 
-    shown = [j for j in jobs if j["sponsor"]] or jobs
+        with open("jobs.json", "w", encoding="utf-8") as f:
+            json.dump({
+                "updated": datetime.datetime.utcnow().isoformat() + "Z",
+                "sponsor_list_loaded": sponsors is not None,
+                "jobs": jobs,
+            }, f, ensure_ascii=False, indent=1)
+    else:
+        # Load existing jobs if available
+        try:
+            with open("jobs.json", "r", encoding="utf-8") as f:
+                jobs = json.load(f).get("jobs", [])
+        except Exception:
+            jobs = []
+
+    shown = [j for j in jobs if j.get("sponsor")] or jobs
     lines = [f"Good morning, Hasibur. {days_left} days left on your visa.", "", make_brief(jobs, days_left), ""]
-    label = "Licensed sponsors hiring" if any(j["sponsor"] for j in jobs) else "New jobs (sponsor check unavailable)"
+    label = "Licensed sponsors hiring" if any(j.get("sponsor") for j in jobs) else "New jobs (sponsor check unavailable)"
     lines.append(f"{label}:")
     for j in shown[:8]:
         lines.append(f"• {j['title']} - {j['company']}, {j['location']} ({salary(j)})\n{j['url']}")
